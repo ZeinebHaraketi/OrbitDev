@@ -16,7 +16,7 @@ const EventDetailItem = ({
   alt: string;
   label: string;
 }) => (
-  <div className="flex-row-gap-2 items-center">
+  <div className="flex flex-row gap-2 items-center">
     <Image src={icon} alt={alt} width={17} height={17} />
     <p>{label}</p>
   </div>
@@ -43,8 +43,12 @@ const EventTags = ({ tags }: { tags: string[] }) => (
   </div>
 );
 
-const EventDetails = async ({ params }: { params: Promise<string> }) => {
-  const slug = await params;
+const EventDetails = async ({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) => {
+  const { slug } = await params;
   let event;
   try {
     const request = await fetch(`${BASE_URL}/api/events/${slug}`, {
@@ -86,8 +90,13 @@ const EventDetails = async ({ params }: { params: Promise<string> }) => {
   if (!description) return notFound();
   const bookings = 10;
 
-  const similarEvents: IEvent[] = await getSimilarEventsBySlug(slug);
-
+  // Fetch similar events
+  let similarEvents: IEvent[] = [];
+  try {
+    similarEvents = await getSimilarEventsBySlug(slug);
+  } catch (error) {
+    console.error("Error fetching similar events:", error);
+  }
   return (
     <section id="event">
       <div className="header">
